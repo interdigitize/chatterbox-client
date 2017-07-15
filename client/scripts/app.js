@@ -6,7 +6,6 @@ var app = {
   },
   fetch: () => {
   }
-
 };
 
 $(document).ready( () => {
@@ -71,10 +70,11 @@ $(document).ready( () => {
 
 
   var postMessage = function() {
+    var room = $('#newRoom').val() || $('select').val();
     var message = {
       username: (window.location.href).split('username=')[1],
       text: $('#messageText').val(),
-      roomname: $('select').val()
+      roomname: room
     };
     $('#messageText').val(''),
     // debugger;
@@ -101,7 +101,10 @@ $(document).ready( () => {
 
 
   //add an event listener for #getMessages to get new messages
-  $('#getMessages').on('click', getMessages);
+  $('#getMessages').on('click', ()=> { 
+    roomname = $('select').val();
+    getMessages(roomname); 
+  });
   //add an event listener for #send to post a message
   $('#sendMessage').on('click', postMessage);
   $('select').change(()=>{ 
