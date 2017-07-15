@@ -10,19 +10,25 @@ var app = {
 };
 
 $(document).ready( () => {
+  // var roomname = $('select').val() || 'Batcave';
+  var roomname = $('select').val() || '77';
+  var getMessages = function(room) {
 
-  var getMessages = function() {
-    console.log('getMessages');
     $('#chats').empty();
     $('select').empty();
+    // $('select').append('<option>All Messages</option>');
     $.ajax({
       url: 'http://parse.sfm8.hackreactor.com/chatterbox/classes/messages',
-      data: { order: '-createdAt', limit: 30},
+      data: { order: '-createdAt', limit: 100},
       success: function( data ) {
-        //make an array for room names
-        let rooms = [];
-        // iterate through the data
-        _.each(data.results, (message) => {
+        console.log('DATA', data);
+        // MESSAGES
+        var data = data.results;
+        var filteredData = _.filter(data, (msg)=>{
+          return msg.roomname === room;
+        });        
+        console.log('FILTERED DATA', filteredData);
+        _.each(filteredData, (message) => {
           //create a chat element for each message
           let el = document.createElement('div');
           $(el).addClass('chat');
@@ -38,21 +44,31 @@ $(document).ready( () => {
           //append the div to chats 
           $('#chats').append(el);
           //add roomnames 
+        });
+
+        //ROOMS 
+        let rooms = [];
+        _.each(data, (message) => {
+          //dedup
           if (!rooms.includes(message.roomname)) {
             rooms.push(message.roomname);
           }
         });
         _.each(rooms, (el)=>{
+          //create an option element for each room 
           let option = document.createElement('option');
           $(option).text(el);
+          //append it to the DOM
+          if ($(option).val() === roomname) {
+            $(option).attr('selected', 'selected');
+          }
           $('select').append(option);
         });
-            //dedup
-            //create an option element for each room 
-            //append it to the DOM
       },
     });
+    console.log('gotMessages');
   };
+
 
   var postMessage = function() {
     var message = {
@@ -76,12 +92,20 @@ $(document).ready( () => {
         console.error('chatterbox: Failed to send message', data);
       }
     });
-    getMessages();
+    getMessages(roomname);
   };
-  getMessages();
+  getMessages(roomname);
+
+  
+
+
 
   //add an event listener for #getMessages to get new messages
   $('#getMessages').on('click', getMessages);
   //add an event listener for #send to post a message
   $('#sendMessage').on('click', postMessage);
+  $('select').change(()=>{ 
+    roomname = $('select').val();
+    getMessages(roomname); 
+  });
 });
