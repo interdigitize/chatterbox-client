@@ -11,44 +11,54 @@ var app = {
 
 $(document).ready( () => {
 
-  
-
   var getMessages = function() {
     console.log('getMessages');
     $('#chats').empty();
+    $('select').empty();
     $.ajax({
       url: 'http://parse.sfm8.hackreactor.com/chatterbox/classes/messages',
       data: { order: '-createdAt', limit: 30},
       success: function( data ) {
+        //make an array for room names
+        let rooms = [];
         // iterate through the data
         _.each(data.results, (message) => {
-          //create a new element for each message
-          // let el = $('<div>');
-          // add the text
+          //create a chat element for each message
           let el = document.createElement('div');
           $(el).addClass('chat');
+          // create an element for the user name
           let username = document.createElement('span');
           $(username).text(message.username);
           $(username).addClass('username');
           $(el).append(username);
+          // create an element for the message
           let msg = document.createElement('div');
           $(msg).text(message.text);
           $(el).append(msg);
           //append the div to chats 
           $('#chats').append(el);
-          
+          //add roomnames 
+          if (!rooms.includes(message.roomname)) {
+            rooms.push(message.roomname);
+          }
         });
+        _.each(rooms, (el)=>{
+          let option = document.createElement('option');
+          $(option).text(el);
+          $('select').append(option);
+        });
+            //dedup
+            //create an option element for each room 
+            //append it to the DOM
       },
     });
   };
 
   var postMessage = function() {
-    //get messageText with .val
-    // var user = (window.location.href).split('username=')[1];
     var message = {
       username: (window.location.href).split('username=')[1],
       text: $('#messageText').val(),
-      roomname: '4chan'
+      roomname: $('select').val()
     };
     $('#messageText').val(''),
     // debugger;
@@ -66,6 +76,7 @@ $(document).ready( () => {
         console.error('chatterbox: Failed to send message', data);
       }
     });
+    getMessages();
   };
   getMessages();
 
