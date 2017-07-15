@@ -10,7 +10,8 @@ var app = {
 
 $(document).ready( () => {
   // var roomname = $('select').val() || 'Batcave';
-  var roomname = $('select').val() || '77';
+  var roomname = $('select').val() || 'foo';
+  var friends = {};
   var getMessages = function(room) {
 
     $('#chats').empty();
@@ -35,6 +36,11 @@ $(document).ready( () => {
           let username = document.createElement('span');
           $(username).text(message.username);
           $(username).addClass('username');
+          // if the username is a friend
+          if (friends.hasOwnProperty(message.username)) {
+            //add the friend class  
+            $(el).addClass('friend');
+          }
           $(el).append(username);
           // create an element for the message
           let msg = document.createElement('div');
@@ -66,6 +72,7 @@ $(document).ready( () => {
       },
     });
     console.log('gotMessages');
+
   };
 
 
@@ -97,9 +104,6 @@ $(document).ready( () => {
   getMessages(roomname);
 
   
-
-
-
   //add an event listener for #getMessages to get new messages
   $('#getMessages').on('click', ()=> { 
     roomname = $('select').val();
@@ -110,5 +114,15 @@ $(document).ready( () => {
   $('select').change(()=>{ 
     roomname = $('select').val();
     getMessages(roomname); 
+  });
+  $('#chats').on('click', 'div', function() {
+    var newFriend = $(this).find('span').text();
+    if (friends.hasOwnProperty(newFriend)) {
+      delete friends[newFriend];
+    } else {
+      friends[newFriend] = newFriend;
+    }
+    getMessages(roomname);
+    console.log('FRIEMDS', friends);
   });
 });
